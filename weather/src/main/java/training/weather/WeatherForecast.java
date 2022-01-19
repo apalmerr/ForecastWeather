@@ -13,7 +13,7 @@ import org.json.JSONObject;
 
 public class WeatherForecast {
 
-	//creamos todas las variables que queremos que sean publicas
+	//creación de variables (las que necesitamos que vean todos los métodos)
 	HttpRequestFactory rf = new NetHttpTransport().createRequestFactory();
 	HttpRequest req;
 	String location;
@@ -23,8 +23,8 @@ public class WeatherForecast {
 
 	
 	
-	//CREAMOS UN MÉTODO PUBLICO 
-	//Lo creamos publico para poder instanciarlo en la clase Test
+	//-----------------MÉTODO PRINCIPAL--------------------- 
+	//lo creamos publico para poder instanciarlo en la clase Test
 	public String getCityWeather(String city, Date datetime) throws IOException {
 		
 		//creamos variables visibles para solo este método
@@ -39,15 +39,15 @@ public class WeatherForecast {
 
 		if (datetime.before(new Date(new Date().getTime() +dias))) {
 			
+			
 			location = city;
+			//llamamos al siguiente método
 			connectionAppi();
 			JSONArray array = new JSONArray(r);
-
-			//creamos variable woeid para que guarde los objetos del JSONArray 
+			//guardamos en variable woeid el id del pronóstico 
 			woeid = array.getJSONObject(0).get("woeid").toString();
-
+			//llamamos al siguiente método
 			woe();
-			
 			
 			results = new JSONObject(r).getJSONArray("consolidated_weather");
 			
@@ -65,7 +65,11 @@ public class WeatherForecast {
 	}
 
 
-	//conectamos a API
+
+
+	//---------------SUBMÉTODOS---------------------
+
+	//conectarnos a API
 	private void connectionAppi() throws IOException {
 		req = rf
 			//crea una GET solicitud para la URL
@@ -73,8 +77,9 @@ public class WeatherForecast {
 		r = req.execute().parseAsString();
 	}
 
+
+	//pasar a la variable r el id del pronostico
 	private void woe() throws IOException {
-		//pasamos a la variable r el id del pronostico 
 		rf = new NetHttpTransport().createRequestFactory();
 		req = rf.buildGetRequest(new GenericUrl("https://www.metaweather.com/api/location/" + woeid));
 		r = req.execute().parseAsString();
