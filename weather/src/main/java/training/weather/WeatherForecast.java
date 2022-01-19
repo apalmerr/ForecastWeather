@@ -13,40 +13,43 @@ import org.json.JSONObject;
 
 public class WeatherForecast {
 
+	//creamos todas las variables que queremos que sean publicas
+	HttpRequestFactory rf = new NetHttpTransport().createRequestFactory();
+	HttpRequest req;
+	String location;
+	String r;
+	String woeid;
+	JSONArray results;
 
+	
+	
 	//CREAMOS UN MÉTODO PUBLICO 
 	//Lo creamos publico para poder instanciarlo en la clase Test
 	public String getCityWeather(String city, Date datetime) throws IOException {
 		
+		//creamos variables visibles para solo este método
+		int dias= 1000 * 60 * 60 * 24 * 6;
+
+
 		//si la fecha es nula, CREA FECHA
 		if (datetime == null) {
 			datetime = new Date();
 		}
 
 
-		if (datetime.before(new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 6)))) {
+		if (datetime.before(new Date(new Date().getTime() +dias))) {
 			
-			//conectamos a API
-			HttpRequestFactory rf = new NetHttpTransport().createRequestFactory();
-			HttpRequest req = rf
-				//crea una GET solicitud para la URL
-				.buildGetRequest(new GenericUrl("https://www.metaweather.com/api/location/search/?query=" + city));
-			
-			String r = req.execute().parseAsString();
-
-			//creamos array JSONArray
+			location = city;
+			connectionAppi();
 			JSONArray array = new JSONArray(r);
 
-			//creamos variable woe para que guarde los objetos del JSONArray 
-			String woe = array.getJSONObject(0).get("woeid").toString();
+			//creamos variable woeid para que guarde los objetos del JSONArray 
+			woeid = array.getJSONObject(0).get("woeid").toString();
 
-			//pasamos a la variable r el id para el pronostico 
-			rf = new NetHttpTransport().createRequestFactory();
-			req = rf.buildGetRequest(new GenericUrl("https://www.metaweather.com/api/location/" + woe));
-			r = req.execute().parseAsString();
+			woe();
 			
-			//creamos array para los resultados 
-			JSONArray results = new JSONObject(r).getJSONArray("consolidated_weather");
+			
+			results = new JSONObject(r).getJSONArray("consolidated_weather");
 			
 			//mientras la variable i (0) sea más pequeña que el resultado (woeid), +1 a i (conseguimos pasar woe a una variable int)
 			for (int i = 0; i < results.length(); i++) {
@@ -59,5 +62,21 @@ public class WeatherForecast {
 			}
 		}
 		return "";
+	}
+
+
+	//conectamos a API
+	private void connectionAppi() throws IOException {
+		req = rf
+			//crea una GET solicitud para la URL
+			.buildGetRequest(new GenericUrl("https://www.metaweather.com/api/location/search/?query=" + location));
+		r = req.execute().parseAsString();
+	}
+
+	private void woe() throws IOException {
+		//pasamos a la variable r el id del pronostico 
+		rf = new NetHttpTransport().createRequestFactory();
+		req = rf.buildGetRequest(new GenericUrl("https://www.metaweather.com/api/location/" + woeid));
+		r = req.execute().parseAsString();
 	}
 }
